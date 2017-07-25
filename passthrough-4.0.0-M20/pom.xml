@@ -336,7 +336,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>results-filter-4.0.0-M20</directory>
+                            <directory>results-passthrough-4.0.0-M20</directory>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                     </filesets>

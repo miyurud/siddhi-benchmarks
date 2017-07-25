@@ -44,7 +44,7 @@ import java.nio.charset.StandardCharsets;
 public class SiddhiPassthroughBenchmark {
     private static final Logger log = Logger.getLogger(SiddhiPassthroughBenchmark.class);
     private static long firstTupleTime = -1;
-    private static String logDir = "./results-filter-4.0.0-M20";
+    private static String logDir = "./results-passthrough-4.0.0-M20";
     private static final int RECORD_WINDOW = 10000; //This is the number of events to record.
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
