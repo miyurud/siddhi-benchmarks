@@ -16,10 +16,10 @@
  * under the License.
  */
 
-package org.wso2.siddhi.common.benchmarks.filter;
+package org.wso2.siddhi.common.benchmarks.passthrough;
 
 import org.apache.log4j.Logger;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
@@ -29,23 +29,23 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+
 /**
- * Simple filtering based benchmark for Siddhi.
+ * Passthrough benchmark for Siddhi.
  */
-public class SiddhiFilterBenchmark {
-    private static final Logger log = Logger.getLogger(SiddhiFilterBenchmark.class);
+public class SiddhiPassthroughBenchmark {
+    private static final Logger log = Logger.getLogger(SiddhiPassthroughBenchmark.class);
     private static long firstTupleTime = -1;
-    private static String logDir = "./results-filter-3.1.0";
+    private static String logDir = "./results-filter-4.0.0-M20";
     private static final int RECORD_WINDOW = 10000; //This is the number of events to record.
-    private static FileWriter fw = null;
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
     private static long timeSpent = 0;
@@ -78,18 +78,19 @@ public class SiddhiFilterBenchmark {
         }
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream inputStream ( iij_timestamp long, value float);";
-        String outputStream = "define stream outputStream ( iij_timestamp long, value float);";
-        String query = "@info(name = 'query1') from inputStream [value < 2.0] " +
-                "select iij_timestamp, value insert into outputStream;\";";
 
-        ExecutionPlanRuntime executionPlanRuntime =
-                siddhiManager.createExecutionPlanRuntime(inputStream + outputStream + query);
-        InputHandler inputHandler = executionPlanRuntime.getInputHandler("inputStream");
+        String siddhiApp = "define stream inputStream ( iij_timestamp long, value float);"
+                + "define stream outputStream ( iij_timestamp long, value float);"
+                + "@info(name = 'query1') from inputStream "
+                + "select iij_timestamp, value insert into outputStream;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
+
+        InputHandler inputHandler = siddhiAppRuntime.getInputHandler("inputStream");
         DataGenerator dataLoader = new DataGenerator(inputHandler);
         dataLoader.start();
 
-        executionPlanRuntime.addCallback("outputStream", new StreamCallback() {
+        siddhiAppRuntime.addCallback("outputStream", new StreamCallback() {
 
             @Override
             public void receive(Event[] events) {
@@ -143,7 +144,7 @@ public class SiddhiFilterBenchmark {
                             timeSpent = 0;
                         }
                     } catch (Exception e) {
-                        log.error("Error while consuming event on incrementStream2, " + e.getMessage(), e);
+                        log.error("Error while consuming event, " + e.getMessage(), e);
                     }
                 }
             }

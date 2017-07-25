@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.common.benchmarks.filter;
+package org.wso2.siddhi.common.benchmarks.passthrough;
 
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -38,10 +38,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Simple filtering based benchmark for Siddhi.
+ * Passthrough benchmark for Siddhi.
  */
-public class SiddhiFilterBenchmark {
-    private static final Logger log = Logger.getLogger(SiddhiFilterBenchmark.class);
+public class SiddhiPassthroughBenchmark {
+    private static final Logger log = Logger.getLogger(SiddhiPassthroughBenchmark.class);
     private static long firstTupleTime = -1;
     private static String logDir = "./results-filter-3.1.0";
     private static final int RECORD_WINDOW = 10000; //This is the number of events to record.
@@ -80,7 +80,7 @@ public class SiddhiFilterBenchmark {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inputStream = "define stream inputStream ( iij_timestamp long, value float);";
         String outputStream = "define stream outputStream ( iij_timestamp long, value float);";
-        String query = "@info(name = 'query1') from inputStream [value < 2.0] " +
+        String query = "@info(name = 'query1') from inputStream " +
                 "select iij_timestamp, value insert into outputStream;\";";
 
         ExecutionPlanRuntime executionPlanRuntime =

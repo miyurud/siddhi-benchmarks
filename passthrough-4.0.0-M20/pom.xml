@@ -4,21 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.wso2</groupId>
-        <artifactId>wso2</artifactId>
-        <version>5</version>
+        <artifactId>siddhi-benchmarks</artifactId>
+        <groupId>org.wso2.siddhi</groupId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+
     </parent>
     <groupId>org.wso2.siddhi</groupId>
-    <artifactId>siddhi-benchmarks</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>passthrough-4.0.0-M20</artifactId>
     <version>1.0-SNAPSHOT</version>
-
-    <modules>
-        <module>filter-3.1.0</module>
-        <module>filter-4.0.0-M20</module>
-        <module>passthrough-3.1.0</module>
-        <module>passthrough-4.0.0-M20</module>
-    </modules>
 
     <dependencies>
         <dependency>
@@ -64,10 +58,10 @@
       
     </dependencies>
     <properties>
-        <siddhi.version>3.1.0</siddhi.version>
+        <siddhi.version>4.0.0-M20</siddhi.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
-        <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
-        <mavan.checkstyle.suppression.file>checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
+        <mavan.findbugsplugin.exclude.file>../findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <mavan.checkstyle.suppression.file>../checkstyle-suppressions.xml</mavan.checkstyle.suppression.file>
     </properties>
     <repositories>
         <repository>
@@ -308,8 +302,46 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <!-- get all project dependencies -->
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <!-- MainClass in mainfest make a executable jar -->
+                    <archive>
+                        <manifest>
+                            <mainClass>com.mkyong.core.utils.App</mainClass>
+                        </manifest>
+                    </archive>
 
-
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <!-- bind to the packaging phase -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>results-filter-4.0.0-M20</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
