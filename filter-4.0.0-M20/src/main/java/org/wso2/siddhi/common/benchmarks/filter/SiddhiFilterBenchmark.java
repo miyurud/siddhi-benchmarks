@@ -140,7 +140,7 @@ public class SiddhiFilterBenchmark {
                                                       "events received (non-atomic)");
                                 fstream.write("\r\n");
                             }
-
+                            //System.out.print(".");
                             fstream.write(
                                     (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
                                             ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
@@ -153,13 +153,15 @@ public class SiddhiFilterBenchmark {
                             eventCount = 0;
                             timeSpent = 0;
 
-                            log.info("-->" + (currentTime - veryFirstTime));
+                            //log.info("-->" + (currentTime - veryFirstTime));
 
                             if (!exitFlag && ((currentTime - veryFirstTime) > totalExperimentDuration)) {
                                 log.info("Exit flag set.");
                                 //Need to filter the output file
                                 setCompletedFlag(sequenceNumber);
                                 exitFlag = true;
+                                dataLoader.shutdown();
+                                siddhiAppRuntime.shutdown();
                             }
 
                         }
@@ -172,8 +174,8 @@ public class SiddhiFilterBenchmark {
 
 
         while (!exitFlag) {
-            dataLoader.shutdown();
-            siddhiAppRuntime.shutdown();
+            //dataLoader.shutdown();
+            //siddhiAppRuntime.shutdown();
             try {
                 Thread.sleep(10 * 1000);
             } catch (InterruptedException e) {
@@ -181,6 +183,7 @@ public class SiddhiFilterBenchmark {
             }
         }
         log.info("Done the experiment. Exitting the benchmark.");
+
     }
 
     /**

@@ -17,4 +17,7 @@
 CLASSPATH=.:target/classes:target/passthrough-4.0.0-M20-1.0-SNAPSHOT-jar-with-dependencies.jar
 JAVA_OPTS="-Xmx8g -Xms8g"
 
-java $JAVA_OPTS -cp $CLASSPATH  org.wso2.siddhi.common.benchmarks.passthrough.SiddhiPassthroughBenchmark
+FULL_EXPERIMENT_DURATION_MINUTES=1
+WARM_UP_PERIOD_MINS=1
+
+java $JAVA_OPTS -cp $CLASSPATH  org.wso2.siddhi.common.benchmarks.passthrough.SiddhiPassthroughBenchmark $FULL_EXPERIMENT_DURATION_MINUTES $WARM_UP_PERIOD_MINS
