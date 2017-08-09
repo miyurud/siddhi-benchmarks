@@ -153,12 +153,10 @@ public class SiddhiFilterBenchmark {
                             eventCount = 0;
                             timeSpent = 0;
 
-                            //log.info("-->" + (currentTime - veryFirstTime));
-
                             if (!exitFlag && ((currentTime - veryFirstTime) > totalExperimentDuration)) {
                                 log.info("Exit flag set.");
                                 //Need to filter the output file
-                                setCompletedFlag(sequenceNumber);
+                                setCompletedFlag(sequenceNumber + 1);
                                 exitFlag = true;
                                 dataLoader.shutdown();
                                 siddhiAppRuntime.shutdown();
@@ -182,7 +180,28 @@ public class SiddhiFilterBenchmark {
                 log.error("Thread interrupted. " + e.getMessage(), e);
             }
         }
+
+        //Preprocess the collected benchmark data
+        preprocessPerformanceData();
+        //Generate the report PDF
+        generateReport();
+
         log.info("Done the experiment. Exitting the benchmark.");
+
+    }
+
+    /**
+     * This method preprocesses the collected data by ignoring the warmup period.
+     */
+    private static void preprocessPerformanceData() {
+
+    }
+
+    /**
+     * This method generates the PDF by scanning through the preprocessed data.
+     * The report will be kept inside the
+     */
+    private static void generateReport() {
 
     }
 
