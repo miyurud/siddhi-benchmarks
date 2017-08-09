@@ -50,12 +50,21 @@ public class SiddhiPassthroughBenchmark {
     private static long eventCount = 0;
     private static long timeSpent = 0;
     private static long totalTimeSpent = 0;
+    private static long warmupPeriod = 0;
+    private static long totalExperimentDuration = 0;
     private static long startTime = System.currentTimeMillis();
     private static boolean flag;
     private static long veryFirstTime = System.currentTimeMillis();
     private static Writer fstream = null;
+    private static long outputFileTimeStamp;
+    private static boolean exitFlag = false;
+    private static int sequenceNumber = 0;
 
     public static void main(String[] args) {
+
+        totalExperimentDuration = Long.parseLong(args[0]) * 60000;
+        warmupPeriod = Long.parseLong(args[1]) * 60000;
+
         try {
             File directory = new File(logDir);
 
@@ -129,7 +138,7 @@ public class SiddhiPassthroughBenchmark {
                                 fstream.write("\r\n");
                             }
 
-                            System.out.print(".");
+                            //System.out.print(".");
                             fstream.write(
                                     (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
                                             ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
@@ -141,6 +150,15 @@ public class SiddhiPassthroughBenchmark {
                             startTime = System.currentTimeMillis();
                             eventCount = 0;
                             timeSpent = 0;
+
+                            if (!exitFlag && ((currentTime - veryFirstTime) > totalExperimentDuration)) {
+                                log.info("Exit flag set.");
+                                //Need to filter the output file
+                                setCompletedFlag(sequenceNumber);
+                                exitFlag = true;
+                                dataLoader.shutdown();
+                                executionPlanRuntime.shutdown();
+                            }
                         }
                     } catch (Exception e) {
                         log.error("Error while consuming event on incrementStream2, " + e.getMessage(), e);
@@ -150,13 +168,16 @@ public class SiddhiPassthroughBenchmark {
         });
 
 
-        while (true) {
+        while (!exitFlag) {
+            // dataLoader.shutdown();
+            // executionPlanRuntime.shutdown();
             try {
                 Thread.sleep(10 * 1000);
             } catch (InterruptedException e) {
                 log.error("Thread interrupted. " + e.getMessage(), e);
             }
         }
+        log.info("Done the experiment. Exitting the benchmark.");
     }
 
     /**
@@ -229,5 +250,33 @@ public class SiddhiPassthroughBenchmark {
         }
 
         return result;
+    }
+
+    private static int setCompletedFlag(int sequenceNumber) {
+        try {
+
+
+            String content = "" + sequenceNumber; //need to increment by one for next round
+            File file = new File(logDir + "/completed-number.txt");
+
+            // if file doesn't exists, then create it
+            if (!file.exists()) {
+                boolean fileCreateResults = file.createNewFile();
+                if (!fileCreateResults) {
+                    log.error("Error when creating the completed-number.txt file.");
+                }
+            }
+
+            Writer fstream = new OutputStreamWriter(new FileOutputStream(file.getAbsoluteFile()), StandardCharsets
+                    .UTF_8);
+
+            fstream.write(content);
+            fstream.flush();
+            fstream.close();
+        } catch (IOException e) {
+            log.error("Error when writing performance information. " + e.getMessage(), e);
+        }
+
+        return 0;
     }
 }

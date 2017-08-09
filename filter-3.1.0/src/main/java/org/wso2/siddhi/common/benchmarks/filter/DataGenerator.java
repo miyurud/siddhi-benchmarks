@@ -29,6 +29,7 @@ import java.util.Random;
 public class DataGenerator extends Thread {
     private InputHandler inputHandler;
     private static final Logger log = Logger.getLogger(DataGenerator.class);
+    private boolean shutdownFlag = false;
 
     public DataGenerator(InputHandler inputHandler) {
         super("Data Generator");
@@ -40,7 +41,7 @@ public class DataGenerator extends Thread {
         Random rand = new Random();
         Object[] dataItem = new Object[]{System.currentTimeMillis(), rand.nextFloat()};
 
-        while (true) {
+        while (!shutdownFlag) {
             try {
                 inputHandler.send(dataItem);
                 dataItem[0] = System.currentTimeMillis();
@@ -50,4 +51,8 @@ public class DataGenerator extends Thread {
             }
         }
     }
+    public void shutdown() {
+        shutdownFlag = true;
+    }
+
 }

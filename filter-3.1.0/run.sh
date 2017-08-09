@@ -16,5 +16,7 @@
 # -----------------------------------------------------------------------------	
 CLASSPATH=.:target/classes:target/filter-3.1.0-1.0-SNAPSHOT-jar-with-dependencies.jar
 JAVA_OPTS="-Xmx8g -Xms8g"
+FULL_EXPERIMENT_DURATION_MINUTES=1
+WARM_UP_PERIOD_MINS=1
 
-java $JAVA_OPTS -cp $CLASSPATH  org.wso2.siddhi.common.benchmarks.filter.SiddhiFilterBenchmark
+java $JAVA_OPTS -cp $CLASSPATH  org.wso2.siddhi.common.benchmarks.filter.SiddhiFilterBenchmark $FULL_EXPERIMENT_DURATION_MINUTES $WARM_UP_PERIOD_MINS
