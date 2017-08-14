@@ -45,6 +45,7 @@ public class SiddhiPassthroughBenchmark {
     private static final Logger log = Logger.getLogger(SiddhiPassthroughBenchmark.class);
     private static long firstTupleTime = -1;
     private static String logDir = "./results-passthrough-4.0.0-M20";
+    private static String filteredLogDir = "./filtered-results-passthrough-4.0.0-M20";
     private static final int RECORD_WINDOW = 10000; //This is the number of events to record.
     private static long eventCountTotal = 0;
     private static long eventCount = 0;
@@ -74,10 +75,12 @@ public class SiddhiPassthroughBenchmark {
                 }
             }
 
+            sequenceNumber = getLogFileSequenceNumber();
+            outputFileTimeStamp = System.currentTimeMillis();
             fstream = new OutputStreamWriter(new FileOutputStream(new File(logDir + "/output-" +
-                                                                                   getLogFileSequenceNumber() + "-" +
+                                                                                   sequenceNumber + "-" +
 
-                                                                                   (System.currentTimeMillis())
+                                                                                   (outputFileTimeStamp)
                                                                                    + ".csv")
                                                                           .getAbsoluteFile()), StandardCharsets
                                                      .UTF_8);
@@ -178,7 +181,103 @@ public class SiddhiPassthroughBenchmark {
                 log.error("Thread interrupted. " + e.getMessage(), e);
             }
         }
+        //Preprocess the collected benchmark data
+        preprocessPerformanceData();
+        //Generate the report PDF
+        generateReport();
+
         log.info("Done the experiment. Exitting the benchmark.");
+
+        log.info("Done the experiment. Exitting the benchmark.");
+    }
+
+    /**
+     * This method preprocesses the collected data by ignoring the warmup period.
+     */
+    private static void preprocessPerformanceData() {
+
+        try {
+            File directory = new File(filteredLogDir);
+
+            if (!directory.exists()) {
+                if (!directory.mkdir()) {
+                    log.error("Error while creating the output directory.");
+                }
+            }
+
+
+            fstream = new OutputStreamWriter(new FileOutputStream(new File(filteredLogDir + "/output-" +
+                                                                                   sequenceNumber + "-" +
+
+                                                                                   (outputFileTimeStamp)
+                                                                                   + ".csv")
+                                                                          .getAbsoluteFile()), StandardCharsets
+                                                     .UTF_8);
+
+        } catch (IOException e) {
+            log.error("Error while creating statistics output file, " + e.getMessage(), e);
+        }
+
+        //String csvFile = (logDir + "/output-" + sequenceNumber + "-" + (outputFileTimeStamp) + ".csv");
+        BufferedReader br = null;
+
+        //File reading
+        try {
+            String line;
+            String csvSplitBy = ",";
+            int iteration = 0;
+            br = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(logDir + "/output-" + sequenceNumber + "-" +
+                                                                      (outputFileTimeStamp) + ".csv"),
+                                          Charset.forName("UTF-8")));
+
+
+            while ((line = br.readLine()) != null) {
+                if (iteration == 0) {
+                    iteration++;
+                    continue;
+                }
+                //use coma separator./
+                String[] filteredData = line.split(csvSplitBy);
+                // log.error(filteredData[0] + " " + filteredData[1]);
+                float time = Float.parseFloat(filteredData[3]);
+                if (time > 60) {
+                    fstream.write(
+                            filteredData[0] + "," + filteredData[1] + "," + filteredData[2] + "," + filteredData[3]
+                                    + ","
+                                    + "" + filteredData[4] + "," + filteredData[5] + "," + filteredData[6]);
+                    fstream.write("\r\n");
+                    fstream.flush();
+                }
+
+            }
+        } catch (Exception ex) {
+            log.error(ex);
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                    fstream.close();
+
+                } catch (IOException e) {
+                    log.error(e);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * This method generates the PDF by scanning through the preprocessed data.
+     * The report will be kept inside the
+     */
+    private static void generateReport() {
+        try {
+            Runtime.getRuntime().exec("python ReportGeneration/reportGeneration.py");
+        } catch (IOException e) {
+            log.error(e);
+        }
+
     }
 
     /**

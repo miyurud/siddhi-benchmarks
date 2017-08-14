@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="filter-3.1.0" />
+        <module name="filter-4.0.0-M20" />
+        <module name="passthrough-3.1.0" />
+        <module name="passthrough-4.0.0-M20" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="filter-3.1.0" target="1.8" />
+      <module name="filter-4.0.0-M20" target="1.8" />
+      <module name="passthrough-3.1.0" target="1.8" />
+      <module name="passthrough-4.0.0-M20" target="1.8" />
+      <module name="siddhi-benchmarks" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
