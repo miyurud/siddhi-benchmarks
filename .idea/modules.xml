@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/filter-3.1.0/filter-3.1.0.iml" filepath="$PROJECT_DIR$/filter-3.1.0/filter-3.1.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/filter-4.0.0-M20/filter-4.0.0-M20.iml" filepath="$PROJECT_DIR$/filter-4.0.0-M20/filter-4.0.0-M20.iml" />
+      <module fileurl="file://$PROJECT_DIR$/passthrough-3.1.0/passthrough-3.1.0.iml" filepath="$PROJECT_DIR$/passthrough-3.1.0/passthrough-3.1.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/passthrough-4.0.0-M20/passthrough-4.0.0-M20.iml" filepath="$PROJECT_DIR$/passthrough-4.0.0-M20/passthrough-4.0.0-M20.iml" />
+      <module fileurl="file://$PROJECT_DIR$/siddhi-benchmarks.iml" filepath="$PROJECT_DIR$/siddhi-benchmarks.iml" />
+    </modules>
+  </component>
+</project>
