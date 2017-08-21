@@ -17,6 +17,7 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.4.1" level="project" />
     <orderEntry type="library" name="Maven: org.tukaani:xz:1.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.4" level="project" />
+    <orderEntry type="library" name="Maven: org.hdrhistogram:HdrHistogram:2.1.9" level="project" />
     <orderEntry type="library" name="Maven: javax.mail:mail:1.4" level="project" />
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1" level="project" />
     <orderEntry type="library" name="Maven: org.wso2.siddhi:siddhi-core:3.1.0" level="project" />

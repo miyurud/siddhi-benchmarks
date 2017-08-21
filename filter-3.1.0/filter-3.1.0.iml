@@ -35,5 +35,6 @@
     <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.5.1" level="project" />
     <orderEntry type="library" name="Maven: commons-net:commons-net:3.3" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.8" level="project" />
+    <orderEntry type="library" name="Maven: org.hdrhistogram:HdrHistogram:2.1.9" level="project" />
   </component>
 </module>

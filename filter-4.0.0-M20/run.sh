@@ -14,7 +14,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # -----------------------------------------------------------------------------	
-CLASSPATH=.:target/classes:target/filter-4.0.0-M20-1.0-SNAPSHOT-jar-with-dependencies.jar
+CLASSPATH=.:target/classes:target/filter-4.0.0-M20-1.0-SNAPSHOT-jar-with-dependencies.jar:/home/gwthamy/projects/streamperf/git/siddhi-benchmarks/filter-4.0.0-M20/lib/HdrHistogram.jar
 JAVA_OPTS="-Xmx8g -Xms8g"
 FULL_EXPERIMENT_DURATION_MINUTES=2
 WARM_UP_PERIOD_MINS=1

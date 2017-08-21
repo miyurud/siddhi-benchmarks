@@ -27,6 +27,8 @@ From: 'an unknown organization'
 
   - org.eclipse.osgi.services  org.eclipse.osgi:org.eclipse.osgi.services:jar:3.3.100.v20120522-1822
 
+  - HdrHistogram (http://hdrhistogram.github.io/HdrHistogram/) org.hdrhistogram:HdrHistogram:bundle:2.1.9
+    License: Public Domain, per Creative Commons CC0  (http://creativecommons.org/publicdomain/zero/1.0/)
   - mvel (http://mvel.codehaus.org/) org.mvel:mvel2:jar:2.2.1.Final
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Quartz Enterprise Job Scheduler (http://quartz-scheduler.org/quartz/) org.quartz-scheduler:quartz:jar:2.1.1

@@ -18,12 +18,14 @@
 
 package org.wso2.siddhi.common.benchmarks.filter;
 
+import org.HdrHistogram.Histogram;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -61,6 +63,8 @@ public class SiddhiFilterBenchmark {
     private static long outputFileTimeStamp;
     private static boolean exitFlag = false;
     private static int sequenceNumber = 0;
+    private static final Histogram histogram = new Histogram(2);
+    private static final Histogram histogram2 = new Histogram(2);
 
     public static void main(String[] args) {
 
@@ -115,6 +119,8 @@ public class SiddhiFilterBenchmark {
                     }
 
                     long iijTimestamp = Long.parseLong(evt.getData()[0].toString());
+                    histogram.recordValue(timeSpent);
+                    histogram2.recordValue(timeSpent);
 
                     try {
                         eventCount++;
@@ -139,18 +145,35 @@ public class SiddhiFilterBenchmark {
                                                       + "number"
                                                       + " of "
                                                       +
-                                                      "events received (non-atomic)");
+                                                      "events received (non-atomic)," + "AVG latency from start (90),"
+                                                      + "" + "AVG latency from start(95), " + "AVG latency from start "
+                                                      + "(99)," + "AVG latency in this "
+                                                      + "window(90)," + "AVG latency in this window(95),"
+                                                      + "AVG latency "
+                                                      + "in this window(99)");
                                 fstream.write("\r\n");
                             }
+
+                            // log.info(histogram.getValueAtPercentile(90) / (double) eventCountTotal);
+                            //   / 1000f);
                             //System.out.print(".");
                             fstream.write(
                                     (eventCountTotal / RECORD_WINDOW) + "," + ((eventCount * 1000) / value) + "," +
                                             ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
                                             ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
                                             / eventCount) +
-                                            "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," + eventCountTotal);
+                                            "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
+                                            eventCountTotal + "," + histogram.getValueAtPercentile(90) + "," +
+                                            histogram
+                                                    .getValueAtPercentile(95) + "," + histogram.getValueAtPercentile(99)
+                                            + ","
+                                            + histogram2.getValueAtPercentile(90) + "," + histogram2
+                                            .getValueAtPercentile(95) + ","
+                                            + histogram2.getValueAtPercentile
+                                            (99));
                             fstream.write("\r\n");
                             fstream.flush();
+                            histogram2.reset();
 
                             startTime = System.currentTimeMillis();
                             eventCount = 0;
@@ -187,7 +210,7 @@ public class SiddhiFilterBenchmark {
         //Preprocess the collected benchmark data
         preprocessPerformanceData();
         //Generate the report PDF
-        generateReport();
+        // generateReport();
 
         log.info("Done the experiment. Exitting the benchmark.");
 
@@ -243,17 +266,19 @@ public class SiddhiFilterBenchmark {
                 String[] filteredData = line.split(csvSplitBy);
                 // log.error(filteredData[0] + " " + filteredData[1]);
                 float time = Float.parseFloat(filteredData[3]);
-                if (time > 60) {
+                if (time > warmupPeriod / 1000.0) {
                     fstream.write(
                             filteredData[0] + "," + filteredData[1] + "," + filteredData[2] + "," + filteredData[3]
                                     + ","
-                                    + "" + filteredData[4] + "," + filteredData[5] + "," + filteredData[6]);
+                                    + "" + filteredData[4] + "," + filteredData[5] + "," + filteredData[6] + ","
+                                    + "" + filteredData[7] + "," + filteredData[8] + "," + filteredData[9] + ","
+                                    + "" + filteredData[10] + "," + filteredData[11] + "," + filteredData[12]);
                     fstream.write("\r\n");
                     fstream.flush();
                 }
 
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             log.error(ex);
         } finally {
             if (br != null) {

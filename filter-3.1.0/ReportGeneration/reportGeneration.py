@@ -2,6 +2,7 @@ from pylatex import Document, Section, Subsection, Command, Math, TikZ, Axis, \
     Plot, Figure, LongTabu, Tabu, Head, PageStyle
 from pylatex.utils import italic, NoEscape, bold
 import os
+import glob
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,41 +22,53 @@ dir = '/home/gwthamy/projects/streamperf/git/siddhi-benchmarks/' + path + '/filt
 throughput_image_dir = "/var/tmp/" + path + "-throughputChart.png"
 latency_image_dir = "/var/tmp/" + path + "-latencyChart.png"
 
+file_counter=-1
+output_files=[]
+
 # array to save throughput total
-throughput = []
+throughput = 0
+
+
 #array to save latency total
-latency = []
+latency = 0
 
-# to calculate over all throughput and latency of this version
-final_throughput_avg = 0
-final_latency_avg = 0
-
+million_throughput_average=0
 
 # loop through each csv file in the specific folder
-def get_all_files(directory):
-    dir_list = os.listdir(directory)
-    csv_files = []
-    for e in dir_list:
-        if e.endswith('.csv'):
-            csv_files.append(e)
-    return csv_files
+#def get_all_files(directory):
+    #dir_list = os.listdir(directory)
+    #csv_files = []
+    #for e in dir_list:
+        #if e.endswith('.csv'):
+	    
+           # csv_files.append(e)
+    #return csv_files
+dir_list = os.listdir(dir)
+csv_files=[]
+for e in dir_list:
+	if e.endswith('.csv'):
+		file_counter+=1
+print file_counter
+	
+
+my_glob = glob.iglob('/home/gwthamy/projects/streamperf/git/siddhi-benchmarks/filter-3.1.0/filtered-results-filter-3.1.0/*.csv')
+newest = min(my_glob, key=os.path.getctime) if my_glob else None
 
 
-def sum_from_csv(csv_file):
-    cr = open(csv_file, 'r')
+cr = open(newest, 'r')
     # cr.next()
-    file_content = cr.readlines()
+file_content = cr.readlines()
 
     # initialize throughput total as zero
-    throughput_total = 0
+throughput_total = 0
     # initialize total latency as zero
-    latency_total = 0
+latency_total = 0
     # array to save throughput in every iteration
-    throughput_dataset = []
+throughput_dataset = []
     # array to save latency in every iteration
-    latency_dataset = []
+latency_dataset = []
 
-    for line in file_content:
+for line in file_content:
         line = line.strip()
         throughput_data = line.split(",")[1]
         float_throughput_data = float(throughput_data)
@@ -68,67 +81,31 @@ def sum_from_csv(csv_file):
         latency_dataset.append(float_latency_data)
 
     # to calculate number of dataset
-    throughput_dataset_length = len(throughput_dataset)
-    throughput_average = throughput_total / throughput_dataset_length
-    million_throughput_average = throughput_average / 1000000
-    throughput.append(million_throughput_average)
+throughput_dataset_length = len(throughput_dataset)
+throughput_average = throughput_total / throughput_dataset_length
+million_throughput_average = throughput_average / 1000000
+throughput=million_throughput_average
 
     # to calculate number of dataset
-    latency_dataset_length = len(latency_dataset)
+latency_dataset_length = len(latency_dataset)
     # convert it into microseconds
-    latency_average = (latency_total / latency_dataset_length) * 1000
-    latency.append(latency_average)
+latency_average = (latency_total / latency_dataset_length) * 1000
+latency=latency_average
 
-    print "Throughput-total is", throughput_total
-    print "Average is", million_throughput_average
-    print "latency average", latency_average
+print "Throughput-total is", throughput_total
+print "Average is", million_throughput_average
+print "latency average", latency_average
+print "counter is", file_counter
 
-
-for each in get_all_files(dir):
-    sum_from_csv(os.path.join(dir, each))
+#for each in get_all_files(dir):
+#sum_from_csv(os.path.join(dir, each))
 
 # count the number of files in the specific folder
 no_of_file = []
-for x in range(0, len(throughput)):
+for x in range(0,file_counter):
     no_of_file.append(x)
 
-# To calculate over all average throughput of this verision
-final_throughput_total = 0
-for avg in throughput:
-    final_throughput_total += avg
-final_throughput_avg = final_throughput_total / len(throughput)
-print final_throughput_avg
 
-# To calculate over all average of latency of this version
-final_latency_total = 0
-for lat_avg in latency:
-    final_latency_total += lat_avg
-
-final_latency_avg = final_latency_total / len(latency)
-print final_latency_avg
-
-
-# Generating Barcharts (Average Throughput vs Siddhi version & Average Latency vs Siddhi version)
-# Bar chart for Average Throughput vs Siddhi version
-
-N = len(throughput)
-print N
-ind = np.arange(N)
-width = 0.45
-plt.figure(1)
-rects1 = plt.bar(ind, throughput, width, color='red')
-plt.xticks(ind + width / 2, (no_of_file))
-plt.ylabel('Average Throughput(million events/second)')
-plt.xlabel('runs')
-plt.savefig(throughput_image_dir)
-
-# Bar chart for Average latency vs Siddhi version
-plt.figure(2)
-rects2 = plt.bar(ind, latency, width, color='blue')
-plt.xticks(ind + width / 2, (no_of_file))
-plt.ylabel('Average Latency(microseconds)')
-plt.xlabel('runs')
-plt.savefig(latency_image_dir)
 
 
 # Report Generation
@@ -159,23 +136,15 @@ with doc.create(
             data_table.end_table_header()
 
             # Iterates through throughput array and no_file_array and append rescpective run and throughput in the row
-            for x, y in np.c_[no_of_file, throughput]:
-                row = [x, y]
-                data_table.add_row(row)
+           # for x, y in np.c_[no_of_file, throughput]:
+            row = [file_counter, throughput]
+            data_table.add_row(row)
     doc.append(NoEscape(r'\newpage'))
     # append graph into the pdf report
-    with doc.create(Subsection("Graph")):
-        with doc.create(Figure(position='h!')) as throughput_chart:
-            throughput_chart.add_image(throughput_image_dir, width='450px')
+   # with doc.create(Subsection("Graph")):
+       # with doc.create(Figure(position='h!')) as throughput_chart:
+            #throughput_chart.add_image(throughput_image_dir, width='450px')
 
-    with doc.create(Subsection("results")):
-        doc.append("Over all throughput average (million events/seconds) of")
-        doc.append(NoEscape(r'\space'))
-        doc.append(path)
-        doc.append(NoEscape(r'\space'))
-        doc.append("is")
-        doc.append(NoEscape(r'\space'))
-        doc.append(final_throughput_avg)
 
 doc.append(NoEscape(r'\newpage'))
 # latency summary table and chart for latency
@@ -193,21 +162,14 @@ with doc.create(
             data_table.end_table_header()
 
             # Iterates through throughput array and no_file_array and append rescpective run and throughput in the row
-            for x, y in np.c_[no_of_file, latency]:
-                row = [x, y]
-                data_table.add_row(row)
+            #for x, y in np.c_[no_of_file, latency]:
+            row = [file_counter, latency]
+            data_table.add_row(row)
     doc.append(NoEscape(r'\newpage'))
     # append graph into the pdf report
-    with doc.create(Subsection("Graph")):
-        with doc.create(Figure(position='h!')) as throughput_chart:
-            throughput_chart.add_image(latency_image_dir, width='450px')
-    with doc.create(Subsection("results")):
-        doc.append("Over all latency average of")
-        doc.append(NoEscape(r'\space'))
-        doc.append(path)
-        doc.append(NoEscape(r'\space'))
-        doc.append("is")
-        doc.append(NoEscape(r'\space'))
-        doc.append(final_latency_avg)
+    
 
-doc.generate_pdf('Report', clean_tex=False)
+String="output"
+
+page=repr(file_counter)
+doc.generate_pdf(String+page, clean_tex=False)

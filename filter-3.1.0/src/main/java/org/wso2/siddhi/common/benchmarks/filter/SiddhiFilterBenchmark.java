@@ -18,6 +18,7 @@
 
 package org.wso2.siddhi.common.benchmarks.filter;
 
+import org.HdrHistogram.Histogram;
 import org.apache.log4j.Logger;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -60,10 +61,13 @@ public class SiddhiFilterBenchmark {
     private static long outputFileTimeStamp;
     private static boolean exitFlag = false;
     private static int sequenceNumber = 0;
+    private static final Histogram histogram = new Histogram(2);
+    private static final Histogram histogram2 = new Histogram(2);
 
     public static void main(String[] args) {
         totalExperimentDuration = Long.parseLong(args[0]) * 60000;
         warmupPeriod = Long.parseLong(args[1]) * 60000;
+
         try {
             File directory = new File(logDir);
 
@@ -110,6 +114,8 @@ public class SiddhiFilterBenchmark {
                     }
 
                     long iijTimestamp = Long.parseLong(evt.getData()[0].toString());
+                    histogram.recordValue(timeSpent);
+                    histogram2.recordValue(timeSpent);
 
                     try {
                         eventCount++;
@@ -134,7 +140,12 @@ public class SiddhiFilterBenchmark {
                                                       + "number"
                                                       + " of "
                                                       +
-                                                      "events received (non-atomic)");
+                                                      "events received (non-atomic)," + "AVG latency from start (90),"
+                                                      + "" + "AVG latency from start(95), " + "AVG latency from start "
+                                                      + "(99)," + "AVG latency in this "
+                                                      + "window(90)," + "AVG latency in this window(95),"
+                                                      + "AVG latency "
+                                                      + "in this window(99)");
                                 fstream.write("\r\n");
                             }
 
@@ -144,9 +155,15 @@ public class SiddhiFilterBenchmark {
                                             ((eventCountTotal * 1000) / (currentTime - veryFirstTime)) + "," +
                                             ((currentTime - veryFirstTime) / 1000f) + "," + (timeSpent * 1.0
                                             / eventCount) +
-                                            "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," + eventCountTotal);
+                                            "," + ((totalTimeSpent * 1.0) / eventCountTotal) + "," +
+                                            eventCountTotal + "," + histogram.getValueAtPercentile(90) + "," + histogram
+                                            .getValueAtPercentile(95) + "," + histogram.getValueAtPercentile(99) + ","
+                                            + "" + histogram2.getValueAtPercentile(90) + ","
+                                            + "" + histogram2.getValueAtPercentile(95) + ","
+                                            + "" + histogram2.getValueAtPercentile(99));
                             fstream.write("\r\n");
                             fstream.flush();
+                            histogram2.reset();
                             startTime = System.currentTimeMillis();
                             eventCount = 0;
                             timeSpent = 0;
@@ -167,8 +184,8 @@ public class SiddhiFilterBenchmark {
         });
 
         while (!exitFlag) {
-           // dataLoader.shutdown();
-           // executionPlanRuntime.shutdown();
+            // dataLoader.shutdown();
+            // executionPlanRuntime.shutdown();
             try {
                 Thread.sleep(10 * 1000);
             } catch (InterruptedException e) {
@@ -179,9 +196,10 @@ public class SiddhiFilterBenchmark {
         //Preprocess the collected benchmark data
         preprocessPerformanceData();
         //Generate the report PDF
-        generateReport();
+        //generateReport();
         log.info("Done the experiment. Exitting the benchmark.");
     }
+
     /**
      * This method preprocesses the collected data by ignoring the warmup period.
      */
@@ -232,17 +250,19 @@ public class SiddhiFilterBenchmark {
                 String[] filteredData = line.split(csvSplitBy);
                 // log.error(filteredData[0] + " " + filteredData[1]);
                 float time = Float.parseFloat(filteredData[3]);
-                if (time > 60) {
+                if (time > warmupPeriod / 1000.0) {
                     fstream.write(
                             filteredData[0] + "," + filteredData[1] + "," + filteredData[2] + "," + filteredData[3]
                                     + ","
-                                    + "" + filteredData[4] + "," + filteredData[5] + "," + filteredData[6]);
+                                    + "" + filteredData[4] + "," + filteredData[5] + "," + filteredData[6] + ","
+                                    + "" + filteredData[7] + "," + filteredData[8] + "," + filteredData[9] + ","
+                                    + "" + filteredData[10] + "," + filteredData[11] + "," + filteredData[12]);
                     fstream.write("\r\n");
                     fstream.flush();
                 }
 
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             log.error(ex);
         } finally {
             if (br != null) {
@@ -255,6 +275,7 @@ public class SiddhiFilterBenchmark {
                 }
             }
         }
+        //generateReport();
 
     }
 
@@ -264,7 +285,7 @@ public class SiddhiFilterBenchmark {
      */
     private static void generateReport() {
         try {
-            Runtime.getRuntime().exec("python ReportGeneration/reportGeneration.py");
+            Runtime.getRuntime().exec("python  ReportGeneration/reportGeneration.py");
         } catch (IOException e) {
             log.error(e);
         }
@@ -342,6 +363,7 @@ public class SiddhiFilterBenchmark {
 
         return result;
     }
+
     private static int setCompletedFlag(int sequenceNumber) {
         try {
 

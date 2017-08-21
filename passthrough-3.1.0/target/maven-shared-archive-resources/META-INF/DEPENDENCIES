@@ -21,6 +21,8 @@ From: 'an unknown organization'
     License: Common Development and Distribution License (CDDL) v1.0  (https://glassfish.dev.java.net/public/CDDLv1.0.html)
   - Apache log4j  org.apache.log4j.wso2:log4j:bundle:1.2.17.wso2v1
 
+  - HdrHistogram (http://hdrhistogram.github.io/HdrHistogram/) org.hdrhistogram:HdrHistogram:bundle:2.1.9
+    License: Public Domain, per Creative Commons CC0  (http://creativecommons.org/publicdomain/zero/1.0/)
   - mvel (http://mvel.codehaus.org/) org.mvel:mvel2:jar:2.2.1.Final
     License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
   - Quartz Enterprise Job Scheduler (http://quartz-scheduler.org/quartz/) org.quartz-scheduler:quartz:jar:2.1.1
