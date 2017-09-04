@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<checkstyle version="6.11.2">
-<file name="/home/gwthamy/projects/streamperf/git/siddhi-benchmarks/filter-4.0.0-M20/src/main/java/org/wso2/siddhi/common/benchmarks/filter/SiddhiFilterBenchmark.java">
-</file>
-<file name="/home/gwthamy/projects/streamperf/git/siddhi-benchmarks/filter-4.0.0-M20/src/main/java/org/wso2/siddhi/common/benchmarks/filter/DataGenerator.java">
-</file>
-</checkstyle>
