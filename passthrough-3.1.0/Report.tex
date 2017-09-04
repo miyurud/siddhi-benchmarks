@@ -1,0 +1,86 @@
+\documentclass{article}%
+\usepackage[T1]{fontenc}%
+\usepackage[utf8]{inputenc}%
+\usepackage{lmodern}%
+\usepackage{textcomp}%
+\usepackage{lastpage}%
+\usepackage{longtable}%
+\usepackage{tabu}%
+\usepackage{graphicx}%
+%
+\title{Report}%
+\author{Stream Processor Performance Testing{-}passthrough{-}3.1.0}%
+\date{\today}%
+%
+\begin{document}%
+\normalsize%
+\maketitle%
+\newpage%
+\section{Average Throughput During 60{-}180 seconds time period since the start of the benchmarking experiment}%
+\hfill \break%
+\subsection{Summary Table}%
+\begin{longtabu}spread 0pt{X[r] X[r]}%
+\textbf{Experiment runs}&\textbf{Average Throughput(million events/second)}\\%
+\hline%
+&\\%
+\endhead%
+0.0&3.20800406715\\%
+1.0&3.11374839693\\%
+\end{longtabu}
+
+%
+\newpage%
+\subsection{Graph}%
+
+
+\begin{figure}[h!]%
+\centering%
+\includegraphics[width=450px]{/var/tmp/{passthrough-3.1.0-throughputChart}.png}%
+\end{figure}
+
+%
+\subsection{results}%
+Over all throughput average (million events/seconds) of%
+\space%
+passthrough{-}3.1.0%
+\space%
+is%
+\space%
+3.16087623204
+
+%
+\newpage%
+\section{Average Latency During 60{-}180 seconds time period since the start of the benchmarking experiment}%
+\hfill \break%
+\subsection{Summary Table}%
+\begin{longtabu}spread 0pt{X[r] X[r]}%
+\textbf{Experiment runs}&\textbf{Average Latency (micro seconds)}\\%
+\hline%
+&\\%
+\endhead%
+0.0&0.197500399723\\%
+1.0&0.212997536272\\%
+\end{longtabu}
+
+%
+\newpage%
+\subsection{Graph}%
+
+
+\begin{figure}[h!]%
+\centering%
+\includegraphics[width=450px]{/var/tmp/{passthrough-3.1.0-latencyChart}.png}%
+\end{figure}
+
+%
+\subsection{results}%
+Over all latency average of%
+\space%
+passthrough{-}3.1.0%
+\space%
+is%
+\space%
+0.205248967997
+
+%
+\end{document}
