@@ -38,7 +38,7 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPersistance {
         public SiddhiAppRuntime siddhiAppRuntime;
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
-        final int inputEventCount = 10;
+        final int inputEventCount = 10000;
         final int eventWindowSize = 4;
 
         public String siddhiApp = "" +
@@ -51,24 +51,17 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPersistance {
                 "select symbol, price, sum(volume) as totalVol " +
                 "insert all events into OutStream ";
 
-        public QueryCallback queryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                log.info(inEvents[0]);
-            }
-        };
-
         @Setup(Level.Trial)
         public void doSetup() {
             log.info("Do Setup");
             log.info("Incremental persistence test 1 - length window query - performance");
+            //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
             PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
 
             siddhiManager = new SiddhiManager();
+            siddhiManager.setPersistenceStore(persistenceStore);
 
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
 
             inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
             siddhiAppRuntime.start();
@@ -81,6 +74,45 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPersistance {
                 }
             }
             try {
+                Thread.sleep(100);
+
+                //persisting
+                siddhiAppRuntime.persist();
+                Thread.sleep(5000);
+
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                //Thread.sleep(100);
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                //Thread.sleep(100);
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
+                Thread.sleep(100);
+
+                //persisting
+                siddhiAppRuntime.persist();
+                Thread.sleep(5000);
+
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                //Thread.sleep(100);
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                //Thread.sleep(100);
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
+                Thread.sleep(100);
+
+                //persisting
+                siddhiAppRuntime.persist();
+                Thread.sleep(5000);
+
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                //Thread.sleep(100);
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                //Thread.sleep(100);
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
                 Thread.sleep(100);
 
                 //persisting

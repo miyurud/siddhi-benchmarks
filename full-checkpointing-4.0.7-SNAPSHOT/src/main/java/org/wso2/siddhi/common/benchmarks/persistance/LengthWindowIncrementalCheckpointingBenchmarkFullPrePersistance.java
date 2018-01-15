@@ -38,7 +38,7 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
         public SiddhiAppRuntime siddhiAppRuntime;
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
-        public final int inputEventCount = 10;
+        public final int inputEventCount = 10000;
         final int eventWindowSize = 4;
 
         public String siddhiApp = "" +
@@ -51,14 +51,6 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
                 "select symbol, price, sum(volume) as totalVol " +
                 "insert all events into OutStream ";
 
-        public QueryCallback queryCallback = new QueryCallback() {
-            @Override
-            public void receive(long timestamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timestamp, inEvents, removeEvents);
-                log.info(inEvents[0]);
-            }
-        };
-
         @Setup(Level.Trial)
         public void doSetup() {
             log.info("Do Setup");
@@ -70,7 +62,6 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
             siddhiManager.setPersistenceStore(persistenceStore);
 
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
-            siddhiAppRuntime.addCallback("query1", queryCallback);
 
             inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
             siddhiAppRuntime.start();
