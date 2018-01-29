@@ -20,6 +20,8 @@
         <module>passthrough-4.0.0-M20</module>
         <module>incremental-checkpointing-4.0.9-SNAPSHOT</module>
         <module>full-checkpointing-4.0.7-SNAPSHOT</module>
+        <module>incremental-checkpointing-jmh-4.0.9-SNAPSHOT</module>
+        <module>full-checkpointing-jmh-4.0.7-SNAPSHOT</module>
     </modules>
 
     <dependencies>

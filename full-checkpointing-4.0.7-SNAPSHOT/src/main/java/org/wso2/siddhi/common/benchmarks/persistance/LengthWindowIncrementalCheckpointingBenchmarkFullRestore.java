@@ -18,45 +18,88 @@
 
 package org.wso2.siddhi.common.benchmarks.persistance;
 
+import org.HdrHistogram.Histogram;
 import org.apache.log4j.Logger;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.Level;
+import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.openjdk.jmh.annotations.*;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.query.output.callback.QueryCallback;
-import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
+import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore;
+import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The benchmark for full checkpointing restoration.
+ */
 public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
-    private static final Logger log = Logger.getLogger(LengthWindowIncrementalCheckpointingBenchmarkFullRestore.class);
+    private static final Logger log = Logger.getLogger(
+            LengthWindowIncrementalCheckpointingBenchmarkFullRestore.class);
+    private static final long REPETITIONS = 10;
+    private static double totalLatencies;
+    private static final Histogram histogram = new Histogram(2);
+    private static long warmupPeriod = 0;
+    private static long totalExperimentDuration = 0;
+    private static long elapsedDuration;
+    private static boolean warmupStarted;
+    private static boolean warmupEnded;
 
+    public static void main(String[] args) {
+        totalExperimentDuration = Long.parseLong(args[0]) * 60000;
+        warmupPeriod = Long.parseLong(args[1]) * 60000;
+
+        ApplicationState app = new ApplicationState();
+        app.doSetup();
+        long timeAtStartup = System.currentTimeMillis();
+
+        while (elapsedDuration < totalExperimentDuration) {
+            testMethod(app);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                log.error(e.getMessage(), e);
+            }
+            elapsedDuration = System.currentTimeMillis() - timeAtStartup;
+        }
+        app.doTearDown();
+    }
+
+    /**
+     * The state object for communicating with JMH method.
+     */
     @State(Scope.Thread)
     public static class ApplicationState {
         public SiddhiAppRuntime siddhiAppRuntime;
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
-        final int inputEventCount = 10000;
-        final int eventWindowSize = 4;
+        public final int inputEventCount = 10000;
+        public String data;
+        final int eventWindowSize = 10000;
 
         public String siddhiApp = "" +
                 "@app:name('Test') " +
                 "" +
-                "define stream StockStream ( symbol string, price float, volume int );" +
+                "define stream StockStream ( symbol string, price float, volume int, description string );" +
                 "" +
                 "@info(name = 'query1')" +
                 "from StockStream[price>10]#window.length(" + eventWindowSize + ") " +
-                "select symbol, price, sum(volume) as totalVol " +
+                "select symbol, price, sum(volume) as totalVol, description " +
                 "insert all events into OutStream ";
 
         @Setup(Level.Trial)
         public void doSetup() {
             log.info("Do Setup");
             log.info("Incremental persistence test 1 - length window query - performance");
-            PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
+            PersistenceStore persistenceStore = new FileSystemPersistenceStore();
 
             siddhiManager = new SiddhiManager();
             siddhiManager.setPersistenceStore(persistenceStore);
@@ -66,11 +109,13 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
             inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
             siddhiAppRuntime.start();
 
+            data = randomAlphaNumeric(128);
+
             for (int i = 0; i < inputEventCount; i++) {
                 try {
-                    inputHandler.send(new Object[]{"IBM", 75.6f + i, 100});
+                    inputHandler.send(new Object[]{"IBM", 75.6f + i, 100, data});
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage(), e);
                 }
             }
             try {
@@ -80,52 +125,52 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
                 siddhiAppRuntime.persist();
                 Thread.sleep(5000);
 
-                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
-                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
                 //persisting
                 siddhiAppRuntime.persist();
                 Thread.sleep(5000);
 
-                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
-                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
                 //persisting
                 siddhiAppRuntime.persist();
                 Thread.sleep(5000);
 
-                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
-                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
                 //persisting
                 siddhiAppRuntime.persist();
                 Thread.sleep(5000);
 
-                inputHandler.send(new Object[]{"IBM", 100.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 200.4f, 100});
+                inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
-                inputHandler.send(new Object[]{"IBM", 300.4f, 100});
+                inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
                 //Thread.sleep(100);
-                inputHandler.send(new Object[]{"WSO2", 400.4f, 200});
+                inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
                 siddhiAppRuntime.persist();
@@ -138,19 +183,41 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
                 Thread.sleep(500);
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
+        }
+
+        public static String randomAlphaNumeric(int count) {
+            String alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            StringBuilder builder = new StringBuilder();
+
+            while (count-- != 0) {
+
+                int character = (int) (Math.random() * alphaNumericString.length());
+
+                builder.append(alphaNumericString.charAt(character));
+
+            }
+
+            return builder.toString();
         }
 
         @TearDown(Level.Trial)
         public void doTearDown() {
             try {
-                System.out.println("Do TearDown");
-                Thread.sleep(500);
+                System.out.println("----- Length Batch Window Full Checkpoint Benchmark - Restoration -----");
+                System.out.println("Total experiment duration (minutes) :" + (totalExperimentDuration / 60000));
+                System.out.println("Warm-up duration (minutes):" + (warmupPeriod / 60000));
+                System.out.println("Number of recordings :" + histogram.getTotalCount());
+                System.out.println("Average Latency (ms) :" + (histogram.getMean()));
+                System.out.println("Percentile Latencies (ms) (90):" + histogram.getValueAtPercentile(90) + ", (95):" + histogram
+                        .getValueAtPercentile(95) + ", (99):" + histogram.getValueAtPercentile(99));
+                System.out.println("Latency Standard Deviation (ms) :" + histogram.getStdDeviation());
+                System.out.println("Latency Max (ms) :" + histogram.getMaxValue());
                 siddhiAppRuntime.shutdown();
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -158,11 +225,39 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
     @Benchmark
     @BenchmarkMode({Mode.Throughput, Mode.SampleTime})
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public void testMethod(ApplicationState state) {
+    public static void testMethod(ApplicationState state) {
         try {
-            state.siddhiAppRuntime.restoreLastRevision();
-        } catch (CannotRestoreSiddhiAppStateException e) {
-            log.error("Restoring of Siddhi app " + state.siddhiAppRuntime.getName() + " failed");
+            state.inputHandler.send(new Object[]{"IBM", 100.4f, 100, state.data});
+            //Thread.sleep(100);
+            state.inputHandler.send(new Object[]{"WSO2", 200.4f, 100, state.data});
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        if (elapsedDuration > warmupPeriod) {
+            long firstTimeStamp = System.currentTimeMillis();
+            try {
+                state.siddhiAppRuntime.restoreLastRevision();
+            } catch (CannotRestoreSiddhiAppStateException e) {
+                log.error("Restoring of Siddhi app " + state.siddhiAppRuntime.getName() + " failed");
+            }
+            long secondTimeStamp = System.currentTimeMillis();
+            long latency = secondTimeStamp - firstTimeStamp;
+            histogram.recordValue(latency);
+
+            totalLatencies += latency;
+        } else {
+            state.siddhiAppRuntime.persist();
+        }
+
+        if (!warmupStarted && !warmupEnded) {
+            warmupStarted = true;
+            log.info("Warm-up started...");
+        }
+
+        if (warmupStarted && !warmupEnded && (elapsedDuration > warmupPeriod)) {
+            warmupEnded = true;
+            log.info("Warm-up completed...");
         }
     }
 }

@@ -16,10 +16,8 @@
  * under the License.
  */
 
-package org.wso2.siddhi.common.benchmarks.persistance;
+package org.wso2.siddhi.common.benchmarks.persistance.jmh;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.HdrHistogram.Histogram;
 import org.apache.log4j.Logger;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -34,50 +32,18 @@ import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.exception.CannotRestoreSiddhiAppStateException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.util.persistence.IncrementalFileSystemPersistenceStore;
+import org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The benchmark for incremental checkpoint restoration.
+ * The benchmark for full checkpointing restoration (JMH version).
  */
-@SuppressWarnings("unused")
-@SuppressFBWarnings("UUF_UNUSED_FIELD")
-public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
+public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
     private static final Logger log = Logger.getLogger(
-            LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore.class);
-    private static final long REPETITIONS = 10;
-    private static double totalLatencies;
-    private static final Histogram histogram = new Histogram(2);
-    private static long warmupPeriod = 0;
-    private static long totalExperimentDuration = 0;
-    private static long elapsedDuration;
-    private static boolean warmupStarted;
-    private static boolean warmupEnded;
+            LengthWindowIncrementalCheckpointingBenchmarkFullRestore.class);
 
-    public static void main(String[] args) {
-        totalExperimentDuration = Long.parseLong(args[0]) * 60000;
-        warmupPeriod = Long.parseLong(args[1]) * 60000;
-
-        ApplicationState app = new ApplicationState();
-        app.doSetup();
-        long timeAtStartup = System.currentTimeMillis();
-
-        while (elapsedDuration < totalExperimentDuration) {
-            testMethod(app);
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                log.error(e.getMessage(), e);
-            }
-            elapsedDuration = System.currentTimeMillis() - timeAtStartup;
-        }
-        app.doTearDown();
-    }
 
 
     /**
@@ -88,9 +54,8 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
         public SiddhiAppRuntime siddhiAppRuntime;
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
-        public final int inputEventCount = 10000;
-        final int eventWindowSize = 10000;
-        public String data;
+        public final int inputEventCount = 1000;
+        final int eventWindowSize = 10;
 
         public String siddhiApp = "" +
                 "@app:name('Test') " +
@@ -106,18 +71,17 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
         public void doSetup() {
             log.info("Do Setup");
             log.info("Incremental persistence test 1 - length window query - performance");
-            PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
+            PersistenceStore persistenceStore = new FileSystemPersistenceStore();
 
             siddhiManager = new SiddhiManager();
             siddhiManager.setPersistenceStore(persistenceStore);
-            siddhiManager.setIncrementalPersistenceStore(new IncrementalFileSystemPersistenceStore());
 
             siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(siddhiApp);
 
             inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
             siddhiAppRuntime.start();
 
-            data = randomAlphaNumeric(128);
+            String data = randomAlphaNumeric(1024 * 256);
 
             for (int i = 0; i < inputEventCount; i++) {
                 try {
@@ -190,18 +154,13 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
 
                 Thread.sleep(500);
 
-                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                //get current date time with Date()
-                Date date = new Date();
-                log.info("Experiment started at : " + dateFormat.format(date));
-
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
         }
 
         public static String randomAlphaNumeric(int count) {
-            final String alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            String alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             StringBuilder builder = new StringBuilder();
 
             while (count-- != 0) {
@@ -218,15 +177,8 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
         @TearDown(Level.Trial)
         public void doTearDown() {
             try {
-                System.out.println("----- Length Batch Window Incremental Checkpoint Benchmark - Restoration -----");
-                System.out.println("Total experiment duration (minutes) :" + (totalExperimentDuration / 60000));
-                System.out.println("Warmup duration (minutes):" + (warmupPeriod / 60000));
-                System.out.println("Number of recordings :" + histogram.getTotalCount());
-                System.out.println("Average Latency (ms) :" + (histogram.getMean()));
-                System.out.println("Percentile Latencies (ms) (90):" + histogram.getValueAtPercentile(90) + ", (95):" + histogram
-                        .getValueAtPercentile(95) + ", (99):" + histogram.getValueAtPercentile(99));
-                System.out.println("Latency Standard Deviation (ms) :" + histogram.getStdDeviation());
-                System.out.println("Latency Max (ms) :" + histogram.getMaxValue());
+                log.info("Do TearDown");
+                Thread.sleep(500);
                 siddhiAppRuntime.shutdown();
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
@@ -238,40 +190,11 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
     @Benchmark
     @BenchmarkMode({Mode.Throughput, Mode.SampleTime})
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public static void testMethod(ApplicationState state) {
+    public void testMethod(ApplicationState state) {
         try {
-            state.inputHandler.send(new Object[]{"IBM", 100.4f, 100, state.data});
-            //Thread.sleep(100);
-            state.inputHandler.send(new Object[]{"WSO2", 200.4f, 100, state.data});
-        } catch (InterruptedException e) {
-            log.error("Sending events to Siddhi app " + state.siddhiAppRuntime.getName() + " failed");
+            state.siddhiAppRuntime.restoreLastRevision();
+        } catch (CannotRestoreSiddhiAppStateException e) {
+            log.error("Restoring of Siddhi app " + state.siddhiAppRuntime.getName() + " failed");
         }
-
-        if (elapsedDuration > warmupPeriod) {
-            long firstTimeStamp = System.currentTimeMillis();
-            try {
-                state.siddhiAppRuntime.restoreLastRevision();
-            } catch (CannotRestoreSiddhiAppStateException e) {
-                log.error(e.getMessage(), e);
-            }
-            long secondTimeStamp = System.currentTimeMillis();
-            long latency = secondTimeStamp - firstTimeStamp;
-            histogram.recordValue(latency);
-
-            totalLatencies += latency;
-        } else {
-            state.siddhiAppRuntime.persist();
-        }
-
-        if (!warmupStarted && !warmupEnded) {
-            warmupStarted = true;
-            log.info("Warm up started...");
-        }
-
-        if (warmupStarted && !warmupEnded && (elapsedDuration > warmupPeriod)) {
-            warmupEnded = true;
-            log.info("Warm up completed...");
-        }
-
     }
 }

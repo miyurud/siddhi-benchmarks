@@ -16,9 +16,8 @@
  * under the License.
  */
 
-package org.wso2.siddhi.common.benchmarks.persistance;
+package org.wso2.siddhi.common.benchmarks.persistance.jmh;
 
-import org.HdrHistogram.Histogram;
 import org.apache.log4j.Logger;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -32,43 +31,17 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * The benchmark for full checkpointing pre persistance.
+ * The benchmark for full checkpointing pre persistance (JMH version).
  */
 public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
     private static final Logger log = Logger.getLogger(
             LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance.class);
-    private static double totalLatencies;
-    private static final Histogram histogram = new Histogram(2);
-    private static long warmupPeriod = 0;
-    private static long totalExperimentDuration = 0;
-    private static long elapsedDuration;
-    private static boolean warmupStarted;
-    private static boolean warmupEnded;
-
-    public static void main(String[] args) {
-        totalExperimentDuration = Long.parseLong(args[0]) * 60000;
-        warmupPeriod = Long.parseLong(args[1]) * 60000;
-
-        ApplicationState app = new ApplicationState();
-        app.doSetup();
-        long timeAtStartup = System.currentTimeMillis();
-
-        while (elapsedDuration < totalExperimentDuration) {
-            testMethod(app);
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                log.error(e.getMessage(), e);
-            }
-            elapsedDuration = System.currentTimeMillis() - timeAtStartup;
-        }
-        app.doTearDown();
-    }
 
     /**
      * The state object for communicating with JMH method.
@@ -78,8 +51,8 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
         public SiddhiAppRuntime siddhiAppRuntime;
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
-        public final int inputEventCount = 10000;
-        final int eventWindowSize = 1000;
+        public final int inputEventCount = 1000;
+        final int eventWindowSize = 10;
         public String data;
 
         public String siddhiApp = "" +
@@ -96,8 +69,7 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
         public void doSetup() {
             log.info("Do Setup");
             log.info("Incremental persistence test 1 - length window query - performance");
-            //PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-            PersistenceStore persistenceStore = new org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore();
+            PersistenceStore persistenceStore = new FileSystemPersistenceStore();
 
             siddhiManager = new SiddhiManager();
             siddhiManager.setPersistenceStore(persistenceStore);
@@ -107,7 +79,7 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
             inputHandler = siddhiAppRuntime.getInputHandler("StockStream");
             siddhiAppRuntime.start();
 
-            data = randomAlphaNumeric(128);
+            data = randomAlphaNumeric(1024 * 256);
         }
 
         public static String randomAlphaNumeric(int count) {
@@ -119,7 +91,6 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
                 int character = (int) (Math.random() * alphaNumericString.length());
 
                 builder.append(alphaNumericString.charAt(character));
-
             }
 
             return builder.toString();
@@ -141,7 +112,7 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
     @Benchmark
     @BenchmarkMode({Mode.Throughput, Mode.SampleTime})
     @OutputTimeUnit(TimeUnit.SECONDS)
-    public static void testMethod(ApplicationState state) {
+    public void testMethod(ApplicationState state) {
         for (int i = 0; i < state.inputEventCount; i++) {
             try {
                 state.inputHandler.send(new Object[]{"IBM", 75.6f + i, 100, state.data});
