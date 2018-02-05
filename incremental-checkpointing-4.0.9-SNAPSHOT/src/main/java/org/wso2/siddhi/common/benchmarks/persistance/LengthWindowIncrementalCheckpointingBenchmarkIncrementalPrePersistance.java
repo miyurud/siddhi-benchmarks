@@ -145,6 +145,11 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalPrePersista
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            //get current date time with Date()
+            Date date = new Date();
+            log.info("Experiment completed at : " + dateFormat.format(date));
         }
     }
 

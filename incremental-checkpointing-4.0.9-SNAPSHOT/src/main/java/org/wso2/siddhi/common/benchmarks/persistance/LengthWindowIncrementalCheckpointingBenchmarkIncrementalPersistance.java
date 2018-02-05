@@ -58,6 +58,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalPersistance
     private static boolean warmupEnded;
 
     public static void main(String[] args) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        log.info("Experiment started at :" + dateFormat.format(date));
         totalExperimentDuration = Long.parseLong(args[0]) * 60000;
         warmupPeriod = Long.parseLong(args[1]) * 60000;
 
@@ -85,9 +88,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalPersistance
         public SiddhiAppRuntime siddhiAppRuntime;
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
-        public final int inputEventCount = 100000;
+        public final int inputEventCount = 10000;
         public String data;
-        final int eventWindowSize = 50000;
+        final int eventWindowSize = 10;
 
         public String siddhiApp = "" +
                 "@app:name('Test') " +
@@ -134,11 +137,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalPersistance
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -187,7 +188,10 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalPersistance
                 log.error(e.getMessage(), e);
             }
 
-            log.info("Done the experiment. Exitting the benchmark.");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            //get current date time with Date()
+            Date date = new Date();
+            log.info("Experiment completed at : " + dateFormat.format(date));
         }
     }
 
@@ -197,7 +201,6 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalPersistance
     public static void testMethod(ApplicationState state) {
         try {
             state.inputHandler.send(new Object[]{"IBM", 100.4f, 100, state.data});
-            //Thread.sleep(100);
             state.inputHandler.send(new Object[]{"WSO2", 200.4f, 100, state.data});
         } catch (InterruptedException e) {
             log.error(e.getMessage(), e);

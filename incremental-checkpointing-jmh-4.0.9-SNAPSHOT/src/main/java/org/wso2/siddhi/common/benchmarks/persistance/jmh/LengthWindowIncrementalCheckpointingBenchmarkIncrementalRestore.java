@@ -35,6 +35,9 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.persistence.IncrementalFileSystemPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -97,11 +100,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -110,11 +111,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -123,11 +122,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -136,11 +133,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -153,6 +148,11 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
 
                 Thread.sleep(500);
 
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                //get current date time with Date()
+                Date date = new Date();
+                log.info("Experiment started at : " + dateFormat.format(date));
+
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
@@ -163,11 +163,8 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
             StringBuilder builder = new StringBuilder();
 
             while (count-- != 0) {
-
                 int character = (int) (Math.random() * alphaNumericString.length());
-
                 builder.append(alphaNumericString.charAt(character));
-
             }
 
             return builder.toString();
@@ -185,6 +182,11 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            //get current date time with Date()
+            Date date = new Date();
+            log.info("Experiment completed at : " + dateFormat.format(date));
         }
     }
 

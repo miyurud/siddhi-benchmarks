@@ -34,6 +34,9 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.persistence.FileSystemPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,6 +83,11 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
             siddhiAppRuntime.start();
 
             data = randomAlphaNumeric(1024 * 256);
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            //get current date time with Date()
+            Date date = new Date();
+            log.info("Experiment started at : " + dateFormat.format(date));
         }
 
         public static String randomAlphaNumeric(int count) {
@@ -106,6 +114,11 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullPrePersistance {
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            //get current date time with Date()
+            Date date = new Date();
+            log.info("Experiment completed at : " + dateFormat.format(date));
         }
     }
 

@@ -22,6 +22,8 @@
         <module>full-checkpointing-4.0.7-SNAPSHOT</module>
         <module>incremental-checkpointing-jmh-4.0.9-SNAPSHOT</module>
         <module>full-checkpointing-jmh-4.0.7-SNAPSHOT</module>
+        <module>incremental-checkpointing-4.0.9-complete-scenario1-SNAPSHOT</module>
+        <module>full-checkpointing-4.0.7-complete-scenario1-SNAPSHOT</module>
     </modules>
 
     <dependencies>

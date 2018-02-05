@@ -89,7 +89,7 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
         public SiddhiManager siddhiManager;
         public InputHandler inputHandler;
         public final int inputEventCount = 10000;
-        final int eventWindowSize = 10000;
+        final int eventWindowSize = 100;
         public String data;
 
         public String siddhiApp = "" +
@@ -134,11 +134,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -147,11 +145,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -160,11 +156,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -173,11 +167,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -218,20 +210,25 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
         @TearDown(Level.Trial)
         public void doTearDown() {
             try {
-                System.out.println("----- Length Batch Window Incremental Checkpoint Benchmark - Restoration -----");
-                System.out.println("Total experiment duration (minutes) :" + (totalExperimentDuration / 60000));
-                System.out.println("Warmup duration (minutes):" + (warmupPeriod / 60000));
-                System.out.println("Number of recordings :" + histogram.getTotalCount());
-                System.out.println("Average Latency (ms) :" + (histogram.getMean()));
-                System.out.println("Percentile Latencies (ms) (90):" + histogram.getValueAtPercentile(90) + ", (95):" + histogram
+                log.info("----- Length Batch Window Incremental Checkpoint Benchmark - Restoration -----");
+                log.info("Total experiment duration (minutes) :" + (totalExperimentDuration / 60000));
+                log.info("Warmup duration (minutes):" + (warmupPeriod / 60000));
+                log.info("Number of recordings :" + histogram.getTotalCount());
+                log.info("Average Latency (ms) :" + (histogram.getMean()));
+                log.info("Percentile Latencies (ms) (90):" + histogram.getValueAtPercentile(90) + ", (95):" + histogram
                         .getValueAtPercentile(95) + ", (99):" + histogram.getValueAtPercentile(99));
-                System.out.println("Latency Standard Deviation (ms) :" + histogram.getStdDeviation());
-                System.out.println("Latency Max (ms) :" + histogram.getMaxValue());
+                log.info("Latency Standard Deviation (ms) :" + histogram.getStdDeviation());
+                log.info("Latency Max (ms) :" + histogram.getMaxValue());
                 siddhiAppRuntime.shutdown();
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            //get current date time with Date()
+            Date date = new Date();
+            log.info("Experiment completed at : " + dateFormat.format(date));
         }
     }
 
@@ -241,7 +238,6 @@ public class LengthWindowIncrementalCheckpointingBenchmarkIncrementalRestore {
     public static void testMethod(ApplicationState state) {
         try {
             state.inputHandler.send(new Object[]{"IBM", 100.4f, 100, state.data});
-            //Thread.sleep(100);
             state.inputHandler.send(new Object[]{"WSO2", 200.4f, 100, state.data});
         } catch (InterruptedException e) {
             log.error("Sending events to Siddhi app " + state.siddhiAppRuntime.getName() + " failed");

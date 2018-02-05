@@ -98,11 +98,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -111,11 +109,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -124,11 +120,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -137,11 +131,9 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
                 Thread.sleep(5000);
 
                 inputHandler.send(new Object[]{"IBM", 100.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 200.4f, 100, data});
 
                 inputHandler.send(new Object[]{"IBM", 300.4f, 100, data});
-                //Thread.sleep(100);
                 inputHandler.send(new Object[]{"WSO2", 400.4f, 200, data});
                 Thread.sleep(100);
 
@@ -164,11 +156,8 @@ public class LengthWindowIncrementalCheckpointingBenchmarkFullRestore {
             StringBuilder builder = new StringBuilder();
 
             while (count-- != 0) {
-
                 int character = (int) (Math.random() * alphaNumericString.length());
-
                 builder.append(alphaNumericString.charAt(character));
-
             }
 
             return builder.toString();
