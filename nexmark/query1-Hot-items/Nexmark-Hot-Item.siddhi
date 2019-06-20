@@ -1,0 +1,29 @@
+@App:name("Nexmark-Hot-Item")
+@App:description("Nexmark-Hot-Item for WSO2 Stream Processor 4.x.x")
+@source(type = 'kafka', partition.no.list='0', threading.option='single.thread', group.id="group", bootstrap.servers=':9092', topic.list = 'test15',
+@map(type = 'json'))
+define stream bidstream ( iij_timestamp long, auction_id int, partition_id int, time long, person int, bid int);
+@sink(type='log')
+define stream outputstream(auction_id int, max_bid long);
+define stream tempstream1(auction_id int, bid_count long, iijtimestamp long);
+@info(name = "query4")
+@dist(execGroup='group11' ,parallel ='4')
+partition with (partition_id of bidstream)
+begin
+    from bidstream 
+    select iij_timestamp, auction_id, partition_id,time,person,bid,convert(time:timestampInMilliseconds(),'long') as injected_iijtimestamp
+    insert into interiminputstream1;
+    
+    from interiminputstream1#window.externalTime(time, 3600 sec)
+    select interiminputstream1.auction_id, count(bid) as bid_count, injected_iijtimestamp as iijtimestamp
+    group by interiminputstream1.auction_id
+    insert into #interiminputstream2;
+     
+    from #interiminputstream2#throughput:throughput(iijtimestamp,"throughput",11,4,"outputstream",1)
+    insert into tempstream1;
+end;
+@info(name = "query5")
+@dist(execGroup='group5' ,parallel ='1')
+from tempstream1#window.timeBatch(60 sec)
+select tempstream1.auction_id, max(bid_count) as max_bid
+insert into outputstream;
